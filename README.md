@@ -135,7 +135,7 @@ Single HTML file, zero external requests, opens offline.
 
 ## Why not just use madge?
 
-Four measured gaps, all reproducible (details and numbers in
+Five measured gaps, all reproducible (details and numbers in
 [`docs/UPSTREAM-FINDINGS.md`](docs/UPSTREAM-FINDINGS.md)):
 
 | gap | upstream | depmesh |
@@ -144,6 +144,7 @@ Four measured gaps, all reproducible (details and numbers in
 | impact analysis | `depends()` is one hop only (133 direct vs 205 transitive for `shared/src/index.ts`) | transitive closure, distance bands, witness chains |
 | tsconfig `paths` without `baseUrl` | **254 alias edges silently lost** on vue-core (931 vs 1185) | config repaired, patch recorded in the report, `injectBaseUrl: false` kept as a control |
 | coverage accounting | flat `skipped` array | per-specifier ledger with 6 reason classes, severity, examples |
+| `exports` subpaths | reports a valid subpath export as an uninstalled package (filing-cabinet predates the `exports` field) | falls back to Node's own resolver before declaring anything missing |
 
 The parser and resolver are the same ones madge uses (`precinct`,
 `filing-cabinet`), and the resulting edge set is **identical** - the parity test
@@ -160,7 +161,7 @@ node scripts/measure-upstream.js      # -> docs/MEASUREMENTS.json
 ## Verification
 
 ```bash
-npm run depmesh:test                                          # 44 tests
+npm run depmesh:test                                          # 50 tests
 node scripts/verify-ui.js demo/vue-core.html --out shots/verify
 node scripts/check-artifacts.js                                # committed artifacts are current
 python scripts/pngstat.py --min-size 1600x950 shots/verify/*.png
@@ -174,6 +175,7 @@ python scripts/pngstat.py --min-size 1600x950 shots/verify/*.png
 | `test-depmesh/cli.test.js` | JSON output, graded exit codes, paths/impact/cycles text, self-contained page, JSON payload cannot break out of its script tag |
 | `test-depmesh/packaging.test.js` | package name, both bins, main entry, upstream subpath, lockfile agreement |
 | `test-depmesh/artifacts.test.js` | committed report/demo are current, CRLF is not mistaken for drift, a real change is caught |
+| `test-depmesh/hygiene.test.js` | no ghost dependencies, scanner deps declared, lockfile agrees with the manifest |
 
 Browser verification asserts on state, not on vibes: model/DOM agreement, canvas
 pixels actually painted, click -> selection -> blast radius equal to an independent

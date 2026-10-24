@@ -4,7 +4,7 @@
     "edges": 1185,
     "cyclicComponents": 8,
     "cyclicNodes": 128,
-    "scanMs": 3201
+    "scanMs": 4296
   },
   "oracle": {
     "cyclicNodes": 128,

@@ -73,8 +73,28 @@ test('syntax errors are detected instead of being silently seen as "no imports"'
 	assert.equal(a.scan.edges.length, 0, 'a broken file contributes no edges');
 });
 
-test('specifiers inside comments and strings never become edges', () => {
-	const a = analyse({roots: [fixture('clean')]});
+test('exports subpaths resolve through Node, not through a guess', () => {
+	// `fake-pkg/adapter` is a valid subpath export. filing-cabinet cannot see it,
+	// so without a fallback it is reported as "bare specifier with no installed
+	// package" - a claim that is simply false. Node is the authority here.
+	const a = analyse({roots: [fixture('exports-subpath')]});
+
+	assert.equal(a.coverage.unresolved.total, 0, 'a valid subpath export is not unresolved');
+	assert.equal(a.scan.ledger.resolvedViaNode, 1, 'the fallback is what resolved it');
+	const external = a.scan.externals.find((e) => e.name === 'fake-pkg');
+	assert.ok(external, 'the package is counted as an installed external dependency');
+	assert.deepEqual(external.specifiers, ['fake-pkg/adapter']);
+});
+
+test('a specifier that neither filing-cabinet nor Node can resolve stays unresolved', () => {
+	const a = analyse({roots: [fixture('missing')]});
+	const unresolved = a.scan.ledger.unresolved.find((u) => u.specifier === 'this-package-is-not-installed');
+	assert.ok(unresolved, 'still reported');
+	assert.equal(unresolved.reason, 'missing-package', 'and the reason is still accurate');
+	assert.equal(a.scan.ledger.resolvedViaNode, undefined, 'the fallback was not needed');
+});
+
+test('specifiers inside comments and strings never become edges', () => {	const a = analyse({roots: [fixture('clean')]});
 	const ids = a.scan.edges.map((e) => `${e.from}>${e.to}`);
 	assert.deepEqual(ids.sort(), ['b.js>a.js', 'entry.js>a.js', 'entry.js>b.js']);
 	// The comment "never imported by anything" in the alias fixture must not create
