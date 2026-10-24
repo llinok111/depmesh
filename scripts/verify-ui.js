@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-/* global document, window, DATA, state, pos, matched */
+/* global DATA, state, pos, matched */
 // The callbacks passed to page.evaluate() run inside the generated page, so the
 // page's globals are declared above rather than imported.
 

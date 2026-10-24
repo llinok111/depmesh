@@ -125,3 +125,36 @@ test('cli: embedded JSON cannot terminate its own script tag', () => {
 	assert.equal(payload.includes('</script>'), false, 'raw closing tag never reaches the payload');
 	assert.equal(JSON.parse(payload).nodes[0].id, '</script>evil.js', 'the value survives intact');
 });
+
+test('cli: --deterministic makes two builds byte-identical', () => {
+  const a = path.join(os.tmpdir(), `depmesh-det-a-${process.pid}.html`);
+  const b = path.join(os.tmpdir(), `depmesh-det-b-${process.pid}.html`);
+  const args = ['build', fixture('cycles'), '--deterministic', '--quiet'];
+
+  assert.equal(run([...args, '--out', a]).code, 0);
+  // A different wall clock must not leak into the artefact.
+  const wait = Date.now() + 1100;
+  while (Date.now() < wait) { /* spin briefly so the timestamps would differ */ }
+  assert.equal(run([...args, '--out', b]).code, 0);
+
+  const left = fs.readFileSync(a);
+  const right = fs.readFileSync(b);
+  assert.equal(left.equals(right), true, 'two deterministic builds are byte-identical');
+
+  const model = JSON.parse(left.toString('utf8').split('<script type="application/json" id="depmesh-model">')[1].split('</script>')[0]);
+  assert.equal(model.meta.generatedAt, '1970-01-01T00:00:00.000Z');
+  assert.equal(model.meta.timingMs, 0);
+  assert.equal(model.meta.deterministic, true);
+
+  fs.rmSync(a, {force: true});
+  fs.rmSync(b, {force: true});
+});
+
+test('cli: a normal build still carries a real timestamp', () => {
+  const out = path.join(os.tmpdir(), `depmesh-live-${process.pid}.html`);
+  assert.equal(run(['build', fixture('clean'), '--out', out, '--quiet']).code, 0);
+  const model = JSON.parse(fs.readFileSync(out, 'utf8').split('<script type="application/json" id="depmesh-model">')[1].split('</script>')[0]);
+  assert.equal(model.meta.deterministic, false);
+  assert.match(model.meta.generatedAt, /^\d{4}-\d{2}-\d{2}T/);
+  fs.rmSync(out, {force: true});
+});

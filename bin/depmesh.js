@@ -31,6 +31,7 @@ Common options
   --exclude <regexp>      repeatable; skip matching files
   --no-type-edges         drop edges that exist only as \`import type\`
   --strict                also fail on warnings (uninstalled packages)
+  --deterministic         fixed timestamp + zero timing, for byte-reproducible builds
   --max-files <n>         refuse to analyse more than n files (default 5000)
   --json                  machine readable output
   --quiet                 suppress the progress line on stderr
@@ -51,6 +52,7 @@ function parseArgs(argv) {
 		exclude: [],
 		typeEdges: true,
 		strict: false,
+		deterministic: false,
 		maxFiles: 5000,
 		json: false,
 		quiet: false,
@@ -77,6 +79,7 @@ function parseArgs(argv) {
 			case '--exclude': options.exclude.push(argv[++i]); break;
 			case '--no-type-edges': options.typeEdges = false; break;
 			case '--strict': options.strict = true; break;
+			case '--deterministic': options.deterministic = true; break;
 			case '--max-files': options.maxFiles = Number(argv[++i]); break;
 			case '--json': options.json = true; break;
 			case '--quiet': options.quiet = true; break;
@@ -107,7 +110,8 @@ function analyseOptions(options) {
 		tsConfig: options.tsconfig || undefined,
 		exclude: options.exclude,
 		includeTypeEdges: options.typeEdges,
-		maxFiles: options.maxFiles
+		maxFiles: options.maxFiles,
+		deterministic: options.deterministic
 	};
 }
 

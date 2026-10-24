@@ -36,14 +36,6 @@
       "env": {
         "node": true,
         "browser": true
-      },
-      "globals": {
-        "DATA": "readonly",
-        "state": "readonly",
-        "pos": "readonly",
-        "matched": "readonly",
-        "draw": "readonly",
-        "select": "readonly"
       }
     }
   ]

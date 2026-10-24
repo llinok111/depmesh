@@ -39,7 +39,7 @@
     "lint": "eslint bin/cli.js lib test/*.js",
     "lint:depmesh": "eslint --no-ignore --no-eslintrc -c eslint.depmesh.json \"lib/depmesh/*.js\" bin/depmesh.js \"scripts/*.js\" \"test-depmesh/*.js\"",
     "depmesh:test": "node scripts/run-tests.js",
-    "depmesh:build": "node bin/depmesh.js build samples/vue-core/packages --tsconfig samples/vue-core/tsconfig.json --ext ts --out demo/vue-core.html",
+    "depmesh:build": "node bin/depmesh.js build samples/vue-core/packages --tsconfig samples/vue-core/tsconfig.json --ext ts --out demo/vue-core.html --deterministic --quiet",
     "depmesh:report": "node scripts/build-report.js",
     "debug": "node bin/cli.js --debug bin lib",
     "generate": "npm run generate:small && npm run generate:madge",
