@@ -1,0 +1,21 @@
+# Every checkout gets LF, on every platform.
+#
+# This is not cosmetic. depmesh records the byte size of each scanned file in
+# the analysis model, and the demo page embeds that model. With the default
+# `core.autocrlf=true` on Windows, a CRLF checkout makes every source file two
+# bytes per line larger, so the model - and therefore the committed demo - differs
+# between platforms even though the code is identical. The Windows CI leg caught
+# exactly this: the same commit produced a demo that no longer matched itself.
+#
+# Pinning LF makes the byte counts, and thus the generated artifacts, identical
+# everywhere.
+* text=auto eol=lf
+
+# Binary artifacts must never be converted.
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.zip binary
