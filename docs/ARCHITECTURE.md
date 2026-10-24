@@ -1,7 +1,8 @@
 # 架构说明
 
 本文说明 depmesh 的数据流、模块职责与关键取舍。所有数字都可在
-`docs/REPORT-vue-core.md` 与 `docs/VERIFICATION.md` 中复核。
+`docs/REPORT-vue-core.md`（语料报告）、`docs/MEASUREMENTS.json`（上游对照实测原始输出）
+与 `docs/UPSTREAM-FINDINGS.md`（缺口分析）中复核。
 
 ## 1. 定位
 

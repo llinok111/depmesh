@@ -139,21 +139,27 @@ Four measured gaps, all reproducible (details and numbers in
 
 | gap | upstream | depmesh |
 | --- | --- | --- |
-| cycle completeness | `circular()` misses **11 of 128** cyclic modules on vue-core; reports DFS back-edge paths, 162 of 184 of which are supersets of another cycle | SCC-exact membership, verified sample cycles, rotation-deduplicated |
-| impact analysis | `depends()` is one hop only | transitive closure, distance bands, witness chains |
-| tsconfig `paths` without `baseUrl` | **408 alias edges silently lost** on vue-core (1329 vs 1737) | config repaired, patch recorded in the report, `injectBaseUrl: false` kept as a control |
+| cycle completeness | `circular()` misses **11 of 128** cyclic modules on vue-core; it reports DFS back-edge paths, of which **213 of 262** contain another reported path as a contiguous sub-path | SCC-exact membership, verified sample cycles, rotation-deduplicated |
+| impact analysis | `depends()` is one hop only (133 direct vs 205 transitive for `shared/src/index.ts`) | transitive closure, distance bands, witness chains |
+| tsconfig `paths` without `baseUrl` | **254 alias edges silently lost** on vue-core (931 vs 1185) | config repaired, patch recorded in the report, `injectBaseUrl: false` kept as a control |
 | coverage accounting | flat `skipped` array | per-specifier ledger with 6 reason classes, severity, examples |
 
 The parser and resolver are the same ones madge uses (`precinct`,
 `filing-cabinet`), and the resulting edge set is **identical** - the parity test
 asserts 1185 vs 1185 with zero difference in both directions.
 
+Every number above is produced by one command, whose raw output is checked in:
+
+```bash
+node scripts/measure-upstream.js      # -> docs/MEASUREMENTS.json
+```
+
 ---
 
 ## Verification
 
 ```bash
-npm run depmesh:test                                          # 33 tests
+npm run depmesh:test                                          # 35 tests
 node scripts/verify-ui.js demo/vue-core.html --out shots/verify
 python scripts/pngstat.py --min-size 1600x950 shots/verify/*.png
 ```
