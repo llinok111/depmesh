@@ -37,6 +37,7 @@
     "mocha": "mocha test/*.js",
     "watch": "mocha --watch --growl test/*.js",
     "lint": "eslint bin/cli.js lib test/*.js",
+    "lint:depmesh": "eslint --no-ignore --no-eslintrc -c eslint.depmesh.json \"lib/depmesh/*.js\" bin/depmesh.js \"scripts/*.js\" \"test-depmesh/*.js\"",
     "depmesh:test": "node scripts/run-tests.js",
     "depmesh:build": "node bin/depmesh.js build samples/vue-core/packages --tsconfig samples/vue-core/tsconfig.json --ext ts --out demo/vue-core.html",
     "depmesh:report": "node scripts/build-report.js",

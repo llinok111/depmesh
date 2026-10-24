@@ -1,19 +1,50 @@
 {
-	"root": true,
-	"extends": "eslint:recommended",
-	"env": {
-		"node": true,
-		"es2022": true,
-		"mocha": false
-	},
-	"parserOptions": {
-		"ecmaVersion": 2022,
-		"sourceType": "script"
-	},
-	"ignorePatterns": ["test-depmesh/fixtures/**"],
-	"rules": {
-		"no-unused-vars": ["error", {"args": "after-used", "caughtErrors": "none"}],
-		"no-empty": ["error", {"allowEmptyCatch": true}],
-		"no-console": "off"
-	}
+  "root": true,
+  "extends": "eslint:recommended",
+  "env": {
+    "node": true,
+    "es2021": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "script"
+  },
+  "ignorePatterns": [
+    "test-depmesh/fixtures/**"
+  ],
+  "rules": {
+    "no-unused-vars": [
+      "error",
+      {
+        "args": "after-used",
+        "caughtErrors": "none"
+      }
+    ],
+    "no-empty": [
+      "error",
+      {
+        "allowEmptyCatch": true
+      }
+    ],
+    "no-console": "off"
+  },
+  "overrides": [
+    {
+      "files": [
+        "scripts/verify-ui.js"
+      ],
+      "env": {
+        "node": true,
+        "browser": true
+      },
+      "globals": {
+        "DATA": "readonly",
+        "state": "readonly",
+        "pos": "readonly",
+        "matched": "readonly",
+        "draw": "readonly",
+        "select": "readonly"
+      }
+    }
+  ]
 }

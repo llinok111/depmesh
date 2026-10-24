@@ -12,7 +12,6 @@
  * No network access, no Graphviz, no writes outside stdout.
  */
 
-const fs = require('node:fs');
 const path = require('node:path');
 const madge = require('../lib/api');
 const {analyse} = require('../lib/depmesh');
