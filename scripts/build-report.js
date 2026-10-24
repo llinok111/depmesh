@@ -103,8 +103,12 @@ function main() {
 
   const text = `${lines.join('\n')}`;
   if (check) {
+    // Git checks the file out with the platform's line ending (core.autocrlf),
+    // so a byte comparison would report "stale" on Windows forever. Compare the
+    // normalised content instead: the report is about numbers, not about CRLF.
+    const normalise = (s) => s.replace(/\r\n/g, '\n');
     const current = fs.existsSync(outFile) ? fs.readFileSync(outFile, 'utf8') : '';
-    if (current !== text) {
+    if (normalise(current) !== normalise(text)) {
       process.stderr.write(`${path.relative(root, outFile)} is stale - run npm run depmesh:report\n`);
       process.exitCode = 1;
       return;

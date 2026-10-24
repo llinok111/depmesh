@@ -47,8 +47,8 @@ jobs:
       - name: Added test suite
         run: npm run depmesh:test
 
-      - name: Corpus report is up to date
-        run: node scripts/build-report.js --check
+      - name: Committed artifacts match a fresh build
+        run: node scripts/check-artifacts.js
 
       - name: Builds are byte-reproducible
         shell: bash
@@ -60,15 +60,6 @@ jobs:
             --tsconfig samples/vue-core/tsconfig.json --ext ts \
             --out "$RUNNER_TEMP/b.html" --deterministic --quiet
           cmp "$RUNNER_TEMP/a.html" "$RUNNER_TEMP/b.html"
-
-      - name: Generated demo matches the committed file
-        shell: bash
-        run: |
-          cp demo/vue-core.html "$RUNNER_TEMP/committed.html"
-          node bin/depmesh.js build samples/vue-core/packages \
-            --tsconfig samples/vue-core/tsconfig.json --ext ts \
-            --out demo/vue-core.html --deterministic --quiet
-          cmp demo/vue-core.html "$RUNNER_TEMP/committed.html"
 
       # Upstream regression suite. Graphviz-backed image tests are expected to
       # fail on Windows; the parity of the other 52 tests is what matters here.

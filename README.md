@@ -160,8 +160,9 @@ node scripts/measure-upstream.js      # -> docs/MEASUREMENTS.json
 ## Verification
 
 ```bash
-npm run depmesh:test                                          # 40 tests
+npm run depmesh:test                                          # 44 tests
 node scripts/verify-ui.js demo/vue-core.html --out shots/verify
+node scripts/check-artifacts.js                                # committed artifacts are current
 python scripts/pngstat.py --min-size 1600x950 shots/verify/*.png
 ```
 
@@ -171,6 +172,8 @@ python scripts/pngstat.py --min-size 1600x950 shots/verify/*.png
 | `test-depmesh/scan.test.js` | missing dependencies never become edges, tsconfig repair with negative control, syntax errors detected, type-only toggle, every edge backed by a literal specifier |
 | `test-depmesh/real.test.js` | exact numbers on vue-core 234/1185/8/128, parity with madge, upstream gap evidence, 376-module CommonJS tree |
 | `test-depmesh/cli.test.js` | JSON output, graded exit codes, paths/impact/cycles text, self-contained page, JSON payload cannot break out of its script tag |
+| `test-depmesh/packaging.test.js` | package name, both bins, main entry, upstream subpath, lockfile agreement |
+| `test-depmesh/artifacts.test.js` | committed report/demo are current, CRLF is not mistaken for drift, a real change is caught |
 
 Browser verification asserts on state, not on vibes: model/DOM agreement, canvas
 pixels actually painted, click -> selection -> blast radius equal to an independent
