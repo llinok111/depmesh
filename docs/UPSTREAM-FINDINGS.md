@@ -3,6 +3,9 @@
 本文记录本仓库在真实项目上测得的四类缺口。每条都有可复现命令与数字，
 不是从 README 推测，也不是从 issue 抄来的。
 
+所有数字由 `node scripts/measure-upstream.js` 一次跑出，原始输出存档在
+`docs/MEASUREMENTS.json`。改动检测链或升级依赖后，重跑该脚本即可发现数字漂移。
+
 上游信息（`gh api repos/pahen/madge`，2026-10-24 核实）：
 
 | 项 | 值 |

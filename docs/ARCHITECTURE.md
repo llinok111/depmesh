@@ -78,12 +78,12 @@ TypeScript 5 允许只写 `paths` 不写 `baseUrl`（相对 tsconfig 所在目�
 于是**整条别名边链静默消失**。
 
 `scan.js` 的 `loadTsConfig()` 在注入 `baseUrl` 后记录 `patches: ['tsconfig-paths-baseurl']`，
-报告里可见。实测影响（vue-core，454 节点口径）：
+报告里可见。实测影响（vue-core，234 模块口径，`node scripts/measure-upstream.js`）：
 
-| 配置 | 边数 | 别名解析 |
+| 配置 | 边数 | skipped 说明符 |
 | --- | --- | --- |
-| 原样交给上游 | 1329 | 全部丢失，35 条说明符落进 skipped |
-| 注入 baseUrl 后 | 1737 | 恢复 408 条跨包边 |
+| 原样交给上游 | 931 | 13 |
+| 注入 baseUrl 后 | 1185 | 恢复 254 条跨包边 |
 
 `injectBaseUrl: false` 保留为**对照开关**，测试用它与默认行为对比，证明修复不是空话。
 

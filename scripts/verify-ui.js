@@ -38,7 +38,8 @@ function loadPlaywright() {
 
 function main() {
 	const args = process.argv.slice(2);
-	const pagePath = path.resolve(args.find((a) => !a.startsWith('-')) || path.join(__dirname, '..', 'demo', 'vue-core.html'));
+	const raw = args.find((a) => !a.startsWith('-')) || path.join(__dirname, '..', 'demo', 'vue-core.html');
+	const pagePath = /^https?:\/\//.test(raw) ? raw : path.resolve(raw);
 	const outIndex = args.indexOf('--out');
 	const shots = path.resolve(outIndex === -1 ? path.join(__dirname, '..', 'shots', 'verify') : args[outIndex + 1]);
 
@@ -47,7 +48,8 @@ function main() {
 		console.error('playwright-core is not installed; skipping browser verification');
 		return 2;
 	}
-	if (!fs.existsSync(pagePath)) {
+	const isUrl = /^https?:\/\//.test(pagePath);
+	if (!isUrl && !fs.existsSync(pagePath)) {
 		console.error(`page not found: ${pagePath}`);
 		return 2;
 	}
@@ -77,7 +79,8 @@ function main() {
 			}
 		});
 
-		await page.goto(`file:///${pagePath.replace(/\\/g, '/')}`, {waitUntil: 'load', timeout: 30000});
+		const target_ = /^https?:\/\//.test(pagePath) ? pagePath : `file:///${pagePath.replace(/\\/g, '/')}`;
+		await page.goto(target_, {waitUntil: 'load', timeout: 30000});
 		await page.waitForTimeout(1200);
 
 		record('no page errors on load', errors.length === 0, errors.slice(0, 3).join(' | '));
