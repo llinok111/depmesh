@@ -1,0 +1,89 @@
+{
+  "depmesh": {
+    "nodes": 234,
+    "edges": 1185,
+    "cyclicComponents": 8,
+    "cyclicNodes": 128,
+    "scanMs": 3201
+  },
+  "oracle": {
+    "cyclicNodes": 128,
+    "matchesScc": true
+  },
+  "parity": {
+    "madgeEdges": 1185,
+    "depmeshEdges": 1185,
+    "onlyMadge": 0,
+    "onlyDepmesh": 0
+  },
+  "upstreamCycles": {
+    "pathRows": 262,
+    "modulesMentioned": 117,
+    "modulesActuallyCyclic": 128,
+    "missedByUpstream": 11,
+    "missedSample": [
+      "compiler-sfc/src/rewriteDefault.ts",
+      "compiler-sfc/src/script/defineEmits.ts",
+      "compiler-sfc/src/script/defineExpose.ts",
+      "compiler-sfc/src/script/defineOptions.ts",
+      "compiler-sfc/src/script/defineSlots.ts",
+      "compiler-sfc/src/script/normalScript.ts",
+      "compiler-sfc/src/script/topLevelAwait.ts",
+      "runtime-core/src/compat/data.ts"
+    ],
+    "missedProof": [
+      {
+        "id": "compiler-sfc/src/rewriteDefault.ts",
+        "reachableFromSelf": true
+      },
+      {
+        "id": "compiler-sfc/src/script/defineEmits.ts",
+        "reachableFromSelf": true
+      },
+      {
+        "id": "compiler-sfc/src/script/defineExpose.ts",
+        "reachableFromSelf": true
+      },
+      {
+        "id": "compiler-sfc/src/script/defineOptions.ts",
+        "reachableFromSelf": true
+      },
+      {
+        "id": "compiler-sfc/src/script/defineSlots.ts",
+        "reachableFromSelf": true
+      },
+      {
+        "id": "compiler-sfc/src/script/normalScript.ts",
+        "reachableFromSelf": true
+      },
+      {
+        "id": "compiler-sfc/src/script/topLevelAwait.ts",
+        "reachableFromSelf": true
+      },
+      {
+        "id": "runtime-core/src/compat/data.ts",
+        "reachableFromSelf": true
+      }
+    ],
+    "supersetRows": 213
+  },
+  "tsconfigFix": {
+    "withoutBaseUrl": {
+      "edges": 931,
+      "skipped": 13
+    },
+    "withBaseUrl": {
+      "edges": 1185,
+      "skipped": 10
+    },
+    "edgesRecovered": 254,
+    "aliasOnlyEdges": 254
+  },
+  "impact": {
+    "hub": "shared/src/index.ts",
+    "upstreamDepends": 133,
+    "depmeshDirect": 133,
+    "depmeshTransitive": 205,
+    "shareOfGraph": 0.8761
+  }
+}
