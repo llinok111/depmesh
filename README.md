@@ -177,6 +177,11 @@ python scripts/pngstat.py --min-size 1600x950 shots/verify/*.png
 | `test-depmesh/artifacts.test.js` | committed report/demo are current, CRLF is not mistaken for drift, a real change is caught |
 | `test-depmesh/hygiene.test.js` | no ghost dependencies, scanner deps declared, lockfile agrees with the manifest |
 
+`scripts/verify-ui.js` needs a Playwright build. It is **not** a dependency of
+this package: install `playwright-core` yourself (or point `NODE_PATH` at an
+existing install) and the script drives Edge/Chromium headlessly; without it the
+script says so and exits 2 instead of pretending to have verified anything.
+
 Browser verification asserts on state, not on vibes: model/DOM agreement, canvas
 pixels actually painted, click -> selection -> blast radius equal to an independent
 recount from the raw edge list, filters, search, path query, zoom, zero page errors.
