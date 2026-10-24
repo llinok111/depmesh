@@ -1,0 +1,7 @@
+# depmesh ships its own lint profile (tabs, private helpers without JSDoc).
+# Keeping it out of the upstream lint target means `npm run lint` still checks
+# upstream code only, while `npm run lint:depmesh` checks the added modules.
+lib/depmesh
+bin/depmesh.js
+scripts
+test-depmesh

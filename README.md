@@ -1,3 +1,202 @@
+# depmesh
+
+**Module dependency analysis and an interactive graph workbench, built on top of [madge](https://github.com/pahen/madge).**
+
+`depmesh` answers four questions about a real codebase, and refuses to answer them
+with invented data:
+
+1. **What is connected to what** - direct dependents and dependencies per module.
+2. **How do two modules connect** - shortest path plus every simple path within a budget.
+3. **What is circular** - strongly connected components (Tarjan), each illustrated
+   with a concrete cycle verified edge by edge.
+4. **What breaks if I change this** - transitive reverse closure with distance bands
+   and a witness chain per affected module.
+
+Every edge in the graph is traceable to one import statement in one file, resolved
+to one path that exists on disk. Anything that could not be resolved is reported as
+**not in the graph**, with a reason - never guessed, never filled in.
+
+This is not a fork of madge. Upstream history (534 commits), `lib/`, `bin/cli.js`,
+the tests and the LICENSE are kept intact; `require('madge')` and the `madge` CLI
+still behave exactly as before.
+
+---
+
+## Quick start
+
+```bash
+npm install
+node bin/depmesh.js analyse samples/vue-core/packages --tsconfig samples/vue-core/tsconfig.json --ext ts
+```
+
+```
+Modules ............... 234
+Import edges .......... 1185
+Cyclic components ..... 8
+Modules in a cycle .... 128
+Unresolved imports .... 30
+```
+
+Build a self-contained interactive page (no server, no CDN, opens from `file://`):
+
+```bash
+node bin/depmesh.js build samples/vue-core/packages --tsconfig samples/vue-core/tsconfig.json --ext ts --out demo/vue-core.html
+```
+
+Prebuilt: [`demo/vue-core.html`](demo/vue-core.html) (234 modules, 1185 edges, 8 cyclic
+components) and [`demo/eslint-lib.html`](demo/eslint-lib.html) (376 modules, 572 edges,
+CommonJS).
+
+---
+
+## What it finds in a real project
+
+`vuejs/core` v3.5.44, `packages/<pkg>/src` - unmodified upstream source
+([provenance](samples/vue-core/PROVENANCE.md)):
+
+| finding | value |
+| --- | --- |
+| modules / edges | 234 / 1185 |
+| strongly connected components | 8, covering 128 modules |
+| largest component | 62 modules (in `runtime-core`), 434 internal edges |
+| blast radius of `shared/src/makeMap.ts` | **212 of 234 modules** (90.6%), from only 5 direct dependents |
+| unresolved imports | 30, all uninstalled packages (`@babel/types`, `estree-walker`, ...) |
+
+The 212-vs-5 gap is the point of the impact analysis: `madge depends()` answers
+"who imports me directly", which understates a one-line change to a shared helper
+by a factor of 42.
+
+Full report: [`docs/REPORT-vue-core.md`](docs/REPORT-vue-core.md).
+
+---
+
+## Commands
+
+```
+depmesh analyse  [options] <path...>            full report (text or --json)
+depmesh coverage [options] <path...>            coverage ledger only
+depmesh impact   [options] <path...> --target <id>
+depmesh paths    [options] <path...> --from <id> --to <id>
+depmesh cycles   [options] <path...>
+depmesh build    [options] <path...> --out <file.html>
+```
+
+Options: `--base`, `--ext`, `--tsconfig`, `--exclude`, `--no-type-edges`,
+`--max-files`, `--strict`, `--json`, `--quiet`, `--max-paths`, `--max-length`.
+
+Exit codes are graded, so this is usable as a CI gate:
+
+| code | meaning |
+| --- | --- |
+| 0 | analysed; every file that parsed is fully represented |
+| 1 | at least one edge is **provably missing** (broken relative import, unresolvable alias, unparsable file). With `--strict`, also on warnings |
+| 2 | invalid arguments or the analysis itself failed |
+
+Warnings (a declared-but-not-installed package) do not fail the build unless
+`--strict` is passed - that distinction is deliberate: a missing devDependency is
+not a broken graph, but it *is* a coverage hole, and the report says so.
+
+---
+
+## Library use
+
+```js
+const {analyse, toModel, impactOf} = require('depmesh');
+
+const a = analyse({roots: ['src'], tsConfig: 'tsconfig.json', extensions: ['ts']});
+
+a.stats;                                     // nodes, edges, cycleComponents, ...
+a.graph.shortestPath('a.ts', 'b.ts');
+a.graph.paths('a.ts', 'b.ts', {maxLength: 10, maxPaths: 50});
+a.graph.cycles().components;                 // SCCs + verified sample cycles
+a.graph.impact('shared/util.ts').byDepth;    // transitive dependents by hop
+a.coverage;                                  // what was and was not covered
+```
+
+`paths()` and `impact()` return `truncated` / `reason` when a budget is hit instead
+of silently returning a short list.
+
+---
+
+## The interactive page
+
+Single HTML file, zero external requests, opens offline.
+
+- Force-directed layout with a deterministic seed (same model -> same layout, so
+  screenshots are comparable between runs).
+- Click a module: direct imports, direct dependents, and the full blast radius
+  grouped by hop distance.
+- Filters for cyclic / entry / leaf modules; search by id substring.
+- Path finder with the same budget semantics as the CLI.
+- A coverage panel that states what the graph does **not** contain.
+
+---
+
+## Why not just use madge?
+
+Four measured gaps, all reproducible (details and numbers in
+[`docs/UPSTREAM-FINDINGS.md`](docs/UPSTREAM-FINDINGS.md)):
+
+| gap | upstream | depmesh |
+| --- | --- | --- |
+| cycle completeness | `circular()` misses **11 of 128** cyclic modules on vue-core; reports DFS back-edge paths, 162 of 184 of which are supersets of another cycle | SCC-exact membership, verified sample cycles, rotation-deduplicated |
+| impact analysis | `depends()` is one hop only | transitive closure, distance bands, witness chains |
+| tsconfig `paths` without `baseUrl` | **408 alias edges silently lost** on vue-core (1329 vs 1737) | config repaired, patch recorded in the report, `injectBaseUrl: false` kept as a control |
+| coverage accounting | flat `skipped` array | per-specifier ledger with 6 reason classes, severity, examples |
+
+The parser and resolver are the same ones madge uses (`precinct`,
+`filing-cabinet`), and the resulting edge set is **identical** - the parity test
+asserts 1185 vs 1185 with zero difference in both directions.
+
+---
+
+## Verification
+
+```bash
+npm run depmesh:test                                          # 33 tests
+node scripts/verify-ui.js demo/vue-core.html --out shots/verify
+python scripts/pngstat.py --min-size 1600x950 shots/verify/*.png
+```
+
+| suite | what it locks down |
+| --- | --- |
+| `test-depmesh/graph.test.js` | cycles, shortest/multiple paths, impact closure, budget honesty, unknown-id refusal, 20k-node chain without stack overflow |
+| `test-depmesh/scan.test.js` | missing dependencies never become edges, tsconfig repair with negative control, syntax errors detected, type-only toggle, every edge backed by a literal specifier |
+| `test-depmesh/real.test.js` | exact numbers on vue-core 234/1185/8/128, parity with madge, upstream gap evidence, 376-module CommonJS tree |
+| `test-depmesh/cli.test.js` | JSON output, graded exit codes, paths/impact/cycles text, self-contained page, JSON payload cannot break out of its script tag |
+
+Browser verification asserts on state, not on vibes: model/DOM agreement, canvas
+pixels actually painted, click -> selection -> blast radius equal to an independent
+recount from the raw edge list, filters, search, path query, zoom, zero page errors.
+16/16 checks pass on both demo pages. Screenshots are then validated statistically
+(size, unique colours, mean luminance, per-band standard deviation) because the
+image viewer on this machine cannot be trusted to confirm a render.
+
+Coverage and limitations are declared, not implied:
+[`docs/COVERAGE.md`](docs/COVERAGE.md), [`docs/LIMITS.md`](docs/LIMITS.md),
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
+---
+
+## License and provenance
+
+- This repository is madge 8.0.0 (MIT) with an added analysis layer. The original
+  `LICENSE` is kept verbatim; attribution and the full inventory of third-party
+  code are in [`NOTICE.md`](NOTICE.md).
+- The bundled corpus `samples/vue-core/` is unmodified vuejs/core 3.5.44 (MIT),
+  pinned by commit and tarball checksum in
+  [`samples/vue-core/PROVENANCE.md`](samples/vue-core/PROVENANCE.md); its license
+  text ships at `samples/vue-core/LICENSE`.
+- The upstream README is preserved at
+  [`docs/UPSTREAM-README.md`](docs/UPSTREAM-README.md).
+
+---
+
+# Upstream: madge
+
+The following is the original madge README, kept for reference. Everything it
+documents still works.
+
 <p align="center">
   <img alt="madge" src="http://pahen.github.io/madge/logo.svg" width="320">
 </p>
