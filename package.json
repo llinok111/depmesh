@@ -1,9 +1,9 @@
 {
-  "name": "madge",
-  "version": "8.0.0",
-  "author": "Patrik Henningsson <patrik.henningsson@gmail.com>",
-  "repository": "git://github.com/pahen/madge",
-  "homepage": "https://github.com/pahen/madge",
+  "name": "depmesh",
+  "version": "1.0.0",
+  "author": "Patrik Henningsson <patrik.henningsson@gmail.com> (upstream madge); depmesh layer by llinok111",
+  "repository": "git+ssh://git@github.com/llinok111/depmesh.git",
+  "homepage": "https://llinok111.github.io/depmesh/",
   "license": "MIT",
   "reveal": true,
   "description": "Dependency analysis and interactive graph workbench for real module graphs (built on madge)",
@@ -28,9 +28,18 @@
   "engines": {
     "node": ">=18"
   },
-  "main": "./lib/api",
+  "main": "./lib/depmesh",
+  "exports": {
+    ".": "./lib/depmesh/index.js",
+    "./coverage": "./lib/depmesh/coverage.js",
+    "./graph": "./lib/depmesh/graph.js",
+    "./scan": "./lib/depmesh/scan.js",
+    "./ui": "./lib/depmesh/ui.js",
+    "./madge": "./lib/api.js"
+  },
   "bin": {
-    "madge": "./bin/cli.js"
+    "madge": "./bin/cli.js",
+    "depmesh": "./bin/depmesh.js"
   },
   "scripts": {
     "test": "npm run lint && npm run mocha",

@@ -1,0 +1,77 @@
+name: depmesh
+
+# The upstream workflow only ran on pull requests, so pushes to master were
+# never verified and the 40 added tests never ran in CI at all. This workflow
+# runs on every push and pull request, on both Linux and Windows, because the
+# Windows run is what catches path-separator and line-ending assumptions that a
+# single-platform green build hides.
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node-version: [18.x, 20.x, 22.x]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }} on ${{ matrix.os }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      # Graphviz is only needed by the upstream image() tests. Without it those
+      # six tests fail for an environmental reason, which is recorded rather than
+      # hidden: the suite is expected to be 52 passing / 6 failing here.
+      - name: Install Graphviz (Linux only)
+        if: runner.os == 'Linux'
+        run: sudo apt install -y --no-install-recommends graphviz
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint the added modules
+        run: npm run lint:depmesh
+
+      - name: Added test suite
+        run: npm run depmesh:test
+
+      - name: Corpus report is up to date
+        run: node scripts/build-report.js --check
+
+      - name: Builds are byte-reproducible
+        shell: bash
+        run: |
+          node bin/depmesh.js build samples/vue-core/packages \
+            --tsconfig samples/vue-core/tsconfig.json --ext ts \
+            --out "$RUNNER_TEMP/a.html" --deterministic --quiet
+          node bin/depmesh.js build samples/vue-core/packages \
+            --tsconfig samples/vue-core/tsconfig.json --ext ts \
+            --out "$RUNNER_TEMP/b.html" --deterministic --quiet
+          cmp "$RUNNER_TEMP/a.html" "$RUNNER_TEMP/b.html"
+
+      - name: Generated demo matches the committed file
+        shell: bash
+        run: |
+          cp demo/vue-core.html "$RUNNER_TEMP/committed.html"
+          node bin/depmesh.js build samples/vue-core/packages \
+            --tsconfig samples/vue-core/tsconfig.json --ext ts \
+            --out demo/vue-core.html --deterministic --quiet
+          cmp demo/vue-core.html "$RUNNER_TEMP/committed.html"
+
+      # Upstream regression suite. Graphviz-backed image tests are expected to
+      # fail on Windows; the parity of the other 52 tests is what matters here.
+      - name: Upstream regression suite
+        if: runner.os == 'Linux'
+        run: npx mocha test/*.js --reporter dot

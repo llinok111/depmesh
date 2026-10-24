@@ -17,8 +17,9 @@ to one path that exists on disk. Anything that could not be resolved is reported
 **not in the graph**, with a reason - never guessed, never filled in.
 
 This is not a fork of madge. Upstream history (534 commits), `lib/`, `bin/cli.js`,
-the tests and the LICENSE are kept intact; `require('madge')` and the `madge` CLI
-still behave exactly as before.
+the tests and the LICENSE are kept intact, and the upstream entry points still work:
+`require('depmesh/madge')` (the upstream API) and `npx madge` (the upstream CLI)
+behave exactly as before.
 
 ---
 
@@ -159,7 +160,7 @@ node scripts/measure-upstream.js      # -> docs/MEASUREMENTS.json
 ## Verification
 
 ```bash
-npm run depmesh:test                                          # 35 tests
+npm run depmesh:test                                          # 40 tests
 node scripts/verify-ui.js demo/vue-core.html --out shots/verify
 python scripts/pngstat.py --min-size 1600x950 shots/verify/*.png
 ```
@@ -186,9 +187,13 @@ Coverage and limitations are declared, not implied:
 
 ## License and provenance
 
-- This repository is madge 8.0.0 (MIT) with an added analysis layer. The original
-  `LICENSE` is kept verbatim; attribution and the full inventory of third-party
-  code are in [`NOTICE.md`](NOTICE.md).
+- depmesh is distributed under the MIT license. `LICENSE` is the upstream madge
+  license, kept byte-for-byte; the added code is released under the same terms.
+  Attribution and the full inventory of third-party code are in
+  [`NOTICE.md`](NOTICE.md).
+- The package is named `depmesh` (1.0.0) rather than `madge` so it can never be
+  confused with, or shadow, the upstream package on a registry. Upstream code is
+  reachable through the `./madge` subpath export and the `madge` bin.
 - The bundled corpus `samples/vue-core/` is unmodified vuejs/core 3.5.44 (MIT),
   pinned by commit and tarball checksum in
   [`samples/vue-core/PROVENANCE.md`](samples/vue-core/PROVENANCE.md); its license
@@ -254,8 +259,12 @@ Read the [changelog](CHANGELOG.md) for latest changes.
 # Installation
 
 ```sh
-npm -g install madge
+git clone git@github.com:llinok111/depmesh.git && cd depmesh
+npm install
 ```
+
+The package is not published to npm; the `madge` command below is the one
+provided by this checkout's `bin` (`npx madge`), not the registry package.
 
 ## Graphviz (optional)
 
@@ -290,7 +299,7 @@ apt-get install graphviz
 > Returns an `Object` with all dependencies.
 
 ```javascript
-const madge = require('madge');
+const madge = require('depmesh/madge');
 
 madge('path/to/app.js').then((res) => {
 	console.log(res.obj());
@@ -302,7 +311,7 @@ madge('path/to/app.js').then((res) => {
 > Returns an `Object` of warnings.
 
 ```javascript
-const madge = require('madge');
+const madge = require('depmesh/madge');
 
 madge('path/to/app.js').then((res) => {
 	console.log(res.warnings());
@@ -314,7 +323,7 @@ madge('path/to/app.js').then((res) => {
 > Returns an `Array` of all modules that have circular dependencies.
 
 ```javascript
-const madge = require('madge');
+const madge = require('depmesh/madge');
 
 madge('path/to/app.js').then((res) => {
 	console.log(res.circular());
@@ -326,7 +335,7 @@ madge('path/to/app.js').then((res) => {
 > Returns an `Object` with only circular dependencies.
 
 ```javascript
-const madge = require('madge');
+const madge = require('depmesh/madge');
 
 madge('path/to/app.js').then((res) => {
 	console.log(res.circularGraph());
@@ -338,7 +347,7 @@ madge('path/to/app.js').then((res) => {
 > Returns an `Array` of all modules that depend on a given module.
 
 ```javascript
-const madge = require('madge');
+const madge = require('depmesh/madge');
 
 madge('path/to/app.js').then((res) => {
 	console.log(res.depends('lib/log.js'));
@@ -350,7 +359,7 @@ madge('path/to/app.js').then((res) => {
 > Return an `Array` of all modules that no one is depending on.
 
 ```javascript
-const madge = require('madge');
+const madge = require('depmesh/madge');
 
 madge('path/to/app.js').then((res) => {
 	console.log(res.orphans());
@@ -362,7 +371,7 @@ madge('path/to/app.js').then((res) => {
 > Return an `Array` of all modules that have no dependencies.
 
 ```javascript
-const madge = require('madge');
+const madge = require('depmesh/madge');
 
 madge('path/to/app.js').then((res) => {
 	console.log(res.leaves());
@@ -374,7 +383,7 @@ madge('path/to/app.js').then((res) => {
 > Returns a `Promise` resolved with a DOT representation of the module dependency graph. Set `circularOnly` to only include circular dependencies.
 
 ```javascript
-const madge = require('madge');
+const madge = require('depmesh/madge');
 
 madge('path/to/app.js')
 	.then((res) => res.dot())
@@ -388,7 +397,7 @@ madge('path/to/app.js')
 > Write the graph as an image to the given image path. Set `circularOnly` to only include circular dependencies. The [image format](http://www.graphviz.org/content/output-formats) to use is determined from the file extension. Returns a `Promise` resolved with a full path to the written image.
 
 ```javascript
-const madge = require('madge');
+const madge = require('depmesh/madge');
 
 madge('path/to/app.js')
 	.then((res) => res.image('path/to/image.svg'))
@@ -402,7 +411,7 @@ madge('path/to/app.js')
 > Return a `Promise` resolved with the XML SVG representation of the dependency graph as a `Buffer`.
 
 ```javascript
-const madge = require('madge');
+const madge = require('depmesh/madge');
 
 madge('path/to/app.js')
 	.then((res) => res.svg())
