@@ -45,6 +45,14 @@ node bin/depmesh.js analyse samples/vue-core/packages --tsconfig samples/vue-cor
 测试用独立判据复核：某节点是否在环上 = 从它出发能否回到它（BFS）。
 `test-depmesh/real.test.js` 里对 11 个"漏网"节点逐个再走一次，全部确实可达自身。
 
+**外部佐证**：上游 issue
+[#447 "Inconsistencies in circular dependency detection"](https://github.com/pahen/madge/issues/447)
+（2025-05-07 提出，至今 open）用两个最小用例说明了同一根因 —— `cyclic.js` 的 DFS
+"遇到未解析节点就截一段栈"的算法，同一个环从不同入口进入会得出不同结果，甚至完全不报。
+另有 #382「index 文件内的环不报」、#395「Angular 项目结果难以理解」指向同一处。
+
+也就是说：这不是本仓库"挑出来的边角问题"，而是上游已知、长期未修的核心算法缺口。
+
 ## 2. 环报告大量冗余：一条环会以"超集"形式重复出现
 
 同一份 262 条输出里，**213 条（81.3%）包含另一条已输出的路径作为连续子路径**，
@@ -92,6 +100,15 @@ vue-core `packages/<pkg>/src`（234 模块）实测：
 
 depmesh 的修法只有一处（`loadTsConfig` 注入 `baseUrl` 并记录 `patches`），
 并且保留 `injectBaseUrl: false` 作为对照，测试里正反两向都断言。
+
+**外部佐证（不是我从零发现）**：上游 issue
+[#463 "TypeScript v6: aliased imports skipped when tsconfig has no baseUrl"](https://github.com/pahen/madge/issues/463)
+（2026-06-02 提出，至今 open）由另一位用户独立报告了同一现象，并给出了同样的
+临时修法 —— "injecting a runtime `baseUrl` into the object madge uses for its
+tsconfig brought us back to the previous dependency counts"。
+
+本仓库的贡献不是"发现这个问题"，而是：把它变成一个**默认开启、可验证、且可关闭对照**
+的修复，并且把"修了多少条边"写成报告里的一个数字，而不是留在 issue 讨论里。
 
 ## 5. 附带发现：上游测试在本机不是全绿
 
