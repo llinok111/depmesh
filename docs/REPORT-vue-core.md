@@ -42,14 +42,14 @@ source; see `samples/vue-core/PROVENANCE.md` for the pinned commit and checksum.
 
 | # | modules | internal edges | shortest verified cycle |
 | --- | --- | --- | --- |
-| 0 | 13 | 48 | `reactivity/src/arrayInstrumentations.ts -> reactivity/src/reactive.ts -> reactivity/src/baseHandlers.ts -> reactivity/src/arrayInstrumentations.ts` |
-| 1 | 14 | 61 | `compiler-core/src/ast.ts -> compiler-core/src/transform.ts -> compiler-core/src/ast.ts` |
-| 2 | 10 | 20 | `compiler-ssr/src/ssrCodegenTransform.ts -> compiler-ssr/src/transforms/ssrTransformComponent.ts -> compiler-ssr/src/ssrCodegenTransform.ts` |
-| 3 | 17 | 54 | `compiler-sfc/src/compileScript.ts -> compiler-sfc/src/parse.ts -> compiler-sfc/src/compileScript.ts` |
-| 4 | 2 | 2 | `compiler-sfc/src/compileStyle.ts -> compiler-sfc/src/style/preprocessors.ts -> compiler-sfc/src/compileStyle.ts` |
-| 5 | 62 | 434 | `runtime-core/src/apiAsyncComponent.ts -> runtime-core/src/component.ts -> runtime-core/src/apiAsyncComponent.ts` |
+| 0 | 62 | 434 | `runtime-core/src/apiAsyncComponent.ts -> runtime-core/src/component.ts -> runtime-core/src/apiAsyncComponent.ts` |
+| 1 | 17 | 54 | `compiler-sfc/src/compileScript.ts -> compiler-sfc/src/parse.ts -> compiler-sfc/src/compileScript.ts` |
+| 2 | 14 | 61 | `compiler-core/src/ast.ts -> compiler-core/src/transform.ts -> compiler-core/src/ast.ts` |
+| 3 | 13 | 48 | `reactivity/src/arrayInstrumentations.ts -> reactivity/src/reactive.ts -> reactivity/src/baseHandlers.ts -> reactivity/src/arrayInstrumentations.ts` |
+| 4 | 10 | 20 | `compiler-ssr/src/ssrCodegenTransform.ts -> compiler-ssr/src/transforms/ssrTransformComponent.ts -> compiler-ssr/src/ssrCodegenTransform.ts` |
+| 5 | 7 | 14 | `server-renderer/src/helpers/ssrCompile.ts -> server-renderer/src/render.ts -> server-renderer/src/helpers/ssrCompile.ts` |
 | 6 | 3 | 4 | `runtime-dom/src/apiCustomElement.ts -> runtime-dom/src/index.ts -> runtime-dom/src/apiCustomElement.ts` |
-| 7 | 7 | 14 | `server-renderer/src/helpers/ssrCompile.ts -> server-renderer/src/render.ts -> server-renderer/src/helpers/ssrCompile.ts` |
+| 7 | 2 | 2 | `compiler-sfc/src/compileStyle.ts -> compiler-sfc/src/style/preprocessors.ts -> compiler-sfc/src/compileStyle.ts` |
 
 Every cyclicity claim above is a strongly connected component computed by
 Tarjan's algorithm; every sample path is checked edge by edge against the
